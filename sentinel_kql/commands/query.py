@@ -13,8 +13,11 @@ def _resolve_timespan(days: int, start: str | None, end: str | None):
     """Return a timedelta or (datetime, datetime) tuple for the Azure SDK."""
     if start or end:
         now = datetime.now(tz=timezone.utc)
-        s = datetime.fromisoformat(start).replace(tzinfo=timezone.utc) if start else now - timedelta(days=days)
-        e = datetime.fromisoformat(end).replace(tzinfo=timezone.utc) if end else now
+        try:
+            s = datetime.fromisoformat(start).replace(tzinfo=timezone.utc) if start else now - timedelta(days=days)
+            e = datetime.fromisoformat(end).replace(tzinfo=timezone.utc) if end else now
+        except ValueError as exc:
+            raise click.BadParameter(str(exc), param_hint="'--start'/'--end'") from exc
         return (s, e)
     return timedelta(days=days)
 

@@ -3,6 +3,7 @@
 import json
 import os
 import tempfile
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -46,3 +47,28 @@ def test_export_json(first_table, tmp_path):
     assert result.returncode == 0, result.stderr
     data = json.loads(out.read_text(encoding="utf-8"))
     assert isinstance(data, list)
+
+
+def test_query_start_end_range(first_table):
+    yesterday = (datetime.now(tz=timezone.utc) - timedelta(days=1)).strftime("%Y-%m-%d")
+    today = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d")
+    result = cli("--output", "json",
+                 cmd=["query", f"{first_table} | limit 3", "--start", yesterday, "--end", today, "--limit", "3"])
+    assert result.returncode == 0, result.stderr
+    rows = json.loads(result.stdout)
+    assert isinstance(rows, list)
+
+
+def test_query_start_only_defaults_end_to_now(first_table):
+    yesterday = (datetime.now(tz=timezone.utc) - timedelta(days=1)).strftime("%Y-%m-%d")
+    result = cli("--output", "json",
+                 cmd=["query", f"{first_table} | limit 3", "--start", yesterday, "--limit", "3"])
+    assert result.returncode == 0, result.stderr
+    rows = json.loads(result.stdout)
+    assert isinstance(rows, list)
+
+
+def test_query_invalid_date_fails():
+    result = cli("--output", "json",
+                 cmd=["query", "SecurityEvent | limit 1", "--start", "not-a-date"])
+    assert result.returncode != 0

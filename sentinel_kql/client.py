@@ -1,7 +1,6 @@
 """Azure Monitor Logs client and query execution."""
 
 import sys
-from datetime import timedelta
 
 from azure.identity import AzureCliCredential
 from azure.monitor.query import LogsQueryClient, LogsQueryStatus
