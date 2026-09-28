@@ -1,0 +1,24 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sentinel-kql"
+version = "0.1.0"
+description = "CLI tool for running KQL hunting queries against Microsoft Sentinel"
+requires-python = ">=3.11"
+dependencies = [
+    "azure-identity>=1.17.0",
+    "azure-monitor-query>=1.4.0",
+    "click>=8.1.0",
+    "rich>=13.7.0",
+]
+
+[project.scripts]
+sentinel-kql = "sentinel_kql.cli:cli"
+
+[tool.hatch.build.targets.wheel]
+packages = ["sentinel_kql"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

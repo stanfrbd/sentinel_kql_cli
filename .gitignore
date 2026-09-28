@@ -1,0 +1,53 @@
+# secrets
+.env
+
+# claude code — ignore local settings but track the agents/skill
+.claude/*
+!.claude/agents/
+
+# python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# installer / pip
+pip-log.txt
+pip-delete-this-directory.txt
+
+# testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# type checkers / linters
+.mypy_cache/
+.ruff_cache/
+
+# editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# exports / output files
+*.csv
+*.json
+!.env.example
