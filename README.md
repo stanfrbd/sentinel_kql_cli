@@ -117,9 +117,9 @@ Options:
 | `whoami` | Show current Azure identity and workspace info |
 | `tables [--days N]` | List tables that have data |
 | `schema TABLE` | Get column schema of a table |
-| `query KQL [--days N] [--limit N]` | Run an inline KQL query |
-| `query-file FILE [--days N] [--limit N]` | Run KQL from a `.kql` file |
-| `saved-searches` | List workspace functions/saved searches |
+| `query KQL [--days N] [--start DATE] [--end DATE] [--limit N]` | Run an inline KQL query |
+| `query-file FILE [--days N] [--start DATE] [--end DATE] [--limit N]` | Run KQL from a `.kql` file |
+| `saved-searches [--days N] [--start DATE] [--end DATE]` | List workspace functions/saved searches |
 
 ### Examples
 
@@ -137,6 +137,12 @@ sentinel-kql schema SigninLogs
 sentinel-kql query "SecurityEvent | where EventID == 4625 | summarize count() by Account" \
   --days 1 --limit 50
 
+# Specific date range
+sentinel-kql query "SecurityEvent" --start 2026-01-01 --end 2026-01-15
+
+# Start date only — end defaults to now
+sentinel-kql query "SecurityEvent" --start 2026-09-01
+
 # JSON output (pipe-friendly)
 sentinel-kql --output json query "Heartbeat | limit 5"
 
@@ -147,6 +153,9 @@ sentinel-kql --export results.csv --export-format csv \
 
 # Run KQL from a file, last 30 days, no row cap
 sentinel-kql query-file hunt.kql --days 30 --limit 0
+
+# Run KQL from a file over a specific date range
+sentinel-kql query-file hunt.kql --start 2026-01-01 --end 2026-01-31 --limit 0
 ```
 
 ## LLM skill

@@ -50,22 +50,28 @@ Get column names and types for a table.
 sentinel-kql --output json schema <TABLE>
 ```
 
-### `query KQL [--days N] [--limit N]`
+### `query KQL [--days N] [--start DATE] [--end DATE] [--limit N]`
 Run an inline KQL query. Default: 1 day lookback, 100-row limit.
+
+`--start` / `--end` accept ISO 8601 dates (`2026-01-01` or `2026-01-01T08:00:00`). When either is set, `--days` is ignored. `--end` defaults to now if omitted.
 ```bash
 sentinel-kql --output json query "T | where ... | summarize ..." --days 7 --limit 0
+sentinel-kql --output json query "SecurityEvent" --start 2026-01-01 --end 2026-01-31 --limit 0
+sentinel-kql --output json query "SecurityEvent" --start 2026-09-01 --limit 0   # end = now
 ```
 
-### `query-file FILE [--days N] [--limit N]`
-Run KQL from a `.kql` file.
+### `query-file FILE [--days N] [--start DATE] [--end DATE] [--limit N]`
+Run KQL from a `.kql` file. Same `--start` / `--end` semantics as `query`.
 ```bash
 sentinel-kql --output json query-file hunt.kql --days 30 --limit 0
+sentinel-kql --output json query-file hunt.kql --start 2026-01-01 --end 2026-01-31 --limit 0
 ```
 
-### `saved-searches`
+### `saved-searches [--days N] [--start DATE] [--end DATE]`
 List workspace functions / saved searches.
 ```bash
 sentinel-kql --output json saved-searches
+sentinel-kql --output json saved-searches --start 2026-01-01 --end 2026-09-28
 ```
 
 ## Typical hunting workflow
@@ -73,7 +79,7 @@ sentinel-kql --output json saved-searches
 1. **Verify identity** — run `whoami`
 2. **Discover tables** — run `tables --days 7` to see what has data
 3. **Inspect schema** — run `schema <table>` before writing a query; note the exact column names
-4. **Hunt** — run `query` with your KQL, start with `--limit 100`, widen `--days` as needed
+4. **Hunt** — run `query` with your KQL, start with `--limit 100`, widen `--days` as needed or pin a specific range with `--start`/`--end`
 5. **Export** — add `--export results.json` or `--export-format csv --export results.csv`
 
 ## Worked example — "what did a user visit recently?"
@@ -122,7 +128,7 @@ sentinel-kql --output csv --export user_visits.csv \
 
 - Global flags (`--output`, `--export`, `--no-verify`) must come **before** the command name
 - `| limit N` is appended automatically unless `--limit 0`; don't add it manually in the KQL
-- The timespan filter is applied by the API; avoid stacking `ago()` on top of `--days`
+- `--days` / `--start`/`--end` set the API scan boundary (controls cost); use them as the primary time control — don't duplicate with `ago()` at the same window (e.g. `--days 7` + `ago(7d)` is redundant, `--days 1` + `ago(7d)` is wrong — the API wins). `ago()` inside KQL is fine only to **sub-filter within** the scan window (e.g. `--days 1` + `| where TimeGenerated > ago(1h)` to show just the last hour)
 - Use `| project` to select only needed columns — avoids truncation in table output
 - For aggregations (`summarize`, `top`), always use `--limit 0`
 

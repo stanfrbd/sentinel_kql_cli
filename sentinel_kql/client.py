@@ -20,12 +20,12 @@ def rows_from_response(table) -> list[dict]:
     return [dict(zip(table.columns, row)) for row in table.rows]
 
 
-def run_kql(client: LogsQueryClient, workspace_id: str, kql: str, days: int) -> list[dict]:
+def run_kql(client: LogsQueryClient, workspace_id: str, kql: str, timespan) -> list[dict]:
     from sentinel_kql.output import err_console, console
 
     with console.status("[bold green]Running query…[/bold green]"):
         response = client.query_workspace(
-            workspace_id, kql, timespan=timedelta(days=days)
+            workspace_id, kql, timespan=timespan
         )
 
     if response.status == LogsQueryStatus.PARTIAL:
